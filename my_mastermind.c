@@ -5,6 +5,8 @@
 #include <time.h>
 #include <unistd.h>
 
+struct mastermind_args{char* code; int attemp;};
+
 //Function to generate secret code
 char* generateCode(){
   char* codeToUse = malloc(4  * sizeof(char));
@@ -14,13 +16,13 @@ char* generateCode(){
   char* colors[9] = {"red", "pink", "bleu", "green", "grey", "yellow", "white", "black", "orange"};
 
 //Generating secret code
-for(int i=0; i < 4; i++){
-  codeToUse[i] = *colors[rand() % 9];
+  for(int i=0; i < 4; i++){
+    codeToUse[i] = *colors[rand() % 9];
   }
   return codeToUse;
 }
 
-struct mastermind_args{char* code; int attemp;};
+
 struct mastermind_args parse_args(int argc, char **argv){
   struct mastermind_args arg;
   arg.code = generateCode();
@@ -46,24 +48,23 @@ int checkGuess(char secretCode[4], char playerGuess[5]){
       wellPlacedPieces++;
     }
     else{
-        for(int j=0; j <= 4; j++){
-            if(secretCode[j] == playerGuess[i]){
-                missPlacedPieces++;
-                break;
-            }
-
+      for(int j=0; j <= 4; j++){
+        if(secretCode[j] == playerGuess[i]){
+          missPlacedPieces++;
+          break;
         }
+      }
     }
   }
+ 
+  if(wellPlacedPieces == 4){
+    return 1;
+  } 
   
-if(wellPlacedPieces == 4){
-  return 1;
-  }
-else{
-  return 0;
-  }
   printf("Well placed pieces: %d\nMissplaced pieces: %d\n", wellPlacedPieces, missPlacedPieces);
+  return 0;
 }
+
 
 //Function to execute the game
 void mastermind(struct mastermind_args *args){
@@ -71,22 +72,23 @@ void mastermind(struct mastermind_args *args){
   printf("Please enter a valid guess\n");
   
   //Declaring and initializing attempt variable
-int attempts = args->attemp;
-int round = 0;
+  int attempts = args->attemp;
+  int round = 0;
 
 while(attempts > 0){
   printf("---\nRound %d\n", round);
   //Declaring player guess
   char playerGuess[5];
-  ssize_t eof = read(STDIN_FILENO, playerGuess, sizeof(playerGuess));
+  ssize_t eof = read(STDIN_FILENO, playerGuess,
+  sizeof(playerGuess));
   if(eof == 0){
-      return;
+    return;
   }
 
 //Checking if player guessed right
   if(checkGuess(args->code,playerGuess)){
-      printf("Congratz! You did it!\n");
-      break;
+    printf("Congratz! You did it!\n");
+    break;
   }
 
   //Decrementing attempts
@@ -96,14 +98,14 @@ while(attempts > 0){
   }
   if(attempts == 0){
     printf("You failed to guess the secret code\n");
- }
+  }
 }
 
 int main(int argc, char **argv){
   struct mastermind_args args = parse_args(argc, argv);
   
  //Calling mastermind
-mastermind(&args);
+  mastermind(&args);  
 
-    return 0;
+  return 0;
 }
